@@ -1,8 +1,14 @@
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../supabase'
 
-function Cart({ cart = [], onClose, onUpdateQuantity }) {
+function Cart({
+  cart = [],
+  isOpen = false,
+  onClose,
+  onUpdateQuantity,
+  onRemove,
+}) {
   const [copied, setCopied] = useState(false)
   const [customerName, setCustomerName] = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
@@ -11,6 +17,23 @@ function Cart({ cart = [], onClose, onUpdateQuantity }) {
 
   const mercadoPagoAlias = 'logros.26'
   const whatsappNumber = '5491125031559'
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    function handleEscape(event) {
+      if (event.key === 'Escape') onClose?.()
+    }
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleEscape)
+    }
+  }, [isOpen, onClose])
 
   function getPrice(item) {
     const value =
@@ -41,7 +64,7 @@ function Cart({ cart = [], onClose, onUpdateQuantity }) {
 
   const cartCount = cart.reduce(
     (total, item) => total + Number(item.quantity || 0),
-    0
+    0,
   )
 
   const cartTotal = cart.reduce((total, item) => {
@@ -52,20 +75,21 @@ function Cart({ cart = [], onClose, onUpdateQuantity }) {
   }, 0)
 
   const productsWithoutPrice = cart.filter(
-    (item) => getPrice(item) === null
+    (item) => getPrice(item) === null,
   ).length
 
-  const pedido = cart.map((item) => {
-    const price = getPrice(item)
-    const quantity = Number(item.quantity || 0)
+  const pedido = cart
+    .map((item) => {
+      const price = getPrice(item)
+      const quantity = Number(item.quantity || 0)
+      const subtotal =
+        price === null
+          ? 'Precio a consultar'
+          : formatPrice(price * quantity)
 
-    const subtotal =
-      price === null
-        ? 'Precio a consultar'
-        : formatPrice(price * quantity)
-
-    return `${item.name} x ${quantity} — ${subtotal}`
-  }).join('\n')
+      return `${item.name} x ${quantity} — ${subtotal}`
+    })
+    .join('\n')
 
   async function copyAlias() {
     try {
@@ -84,11 +108,11 @@ function Cart({ cart = [], onClose, onUpdateQuantity }) {
     setSubmitting(true)
     setMessage('')
 
-    // Abrimos una pestaña durante la acción del usuario para evitar
-    // que el navegador bloquee WhatsApp después de guardar el pedido.
-    const whatsappWindow = window.open('about:blank', '_blank')
+    let whatsappWindow = null
 
     try {
+      whatsappWindow = window.open('about:blank', '_blank')
+
       const orderItems = cart.map((item) => {
         const price = getPrice(item)
         const quantity = Number(item.quantity || 0)
@@ -131,8 +155,7 @@ function Cart({ cart = [], onClose, onUpdateQuantity }) {
         `Pedido registrado. Pendiente de confirmar el pago.`
 
       const whatsappUrl =
-        `https://wa.me/${whatsappNumber}?text=` +
-        encodeURIComponent(whatsappMessage)
+        `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
 
       if (whatsappWindow && !whatsappWindow.closed) {
         whatsappWindow.location.href = whatsappUrl
@@ -149,15 +172,20 @@ function Cart({ cart = [], onClose, onUpdateQuantity }) {
       setMessage(
         `No pudimos registrar el pedido: ${
           error.message || 'Error desconocido'
-        }. Revisá tu conexión e intentá nuevamente.`
+        }. Revisá tu conexión e intentá nuevamente.`,
       )
     } finally {
       setSubmitting(false)
     }
   }
 
+  if (!isOpen) return null
+
   return (
-    <div className="cart-backdrop" onClick={onClose}>
+    <div
+      className="cart-backdrop"
+      onClick={onClose}
+    >
       <aside
         className="cart-panel"
         role="dialog"
@@ -215,7 +243,7 @@ function Cart({ cart = [], onClose, onUpdateQuantity }) {
                       <div className="quantity-controls">
                         <button
                           type="button"
-                          onClick={() => onUpdateQuantity(item.id, -1)}
+                          onClick={() => onUpdateQuantity?.(item.id, -1)}
                           aria-label={`Quitar una unidad de ${item.name}`}
                         >
                           −
@@ -225,12 +253,22 @@ function Cart({ cart = [], onClose, onUpdateQuantity }) {
 
                         <button
                           type="button"
-                          onClick={() => onUpdateQuantity(item.id, 1)}
+                          onClick={() => onUpdateQuantity?.(item.id, 1)}
                           aria-label={`Agregar una unidad de ${item.name}`}
                         >
                           +
                         </button>
                       </div>
+
+                      {onRemove && (
+                        <button
+                          type="button"
+                          className="cart-remove"
+                          onClick={() => onRemove(item.id)}
+                        >
+                          Eliminar producto
+                        </button>
+                      )}
                     </div>
                   </article>
                 )

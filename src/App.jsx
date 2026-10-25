@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
-
 import Header from './components/Header'
 import Hero from './components/Hero'
 import Categories from './components/Categories'
@@ -9,7 +8,6 @@ import ProductCatalog from './components/ProductCatalog'
 import Cart from './components/Cart'
 import AdminPanel from './components/AdminPanel'
 import Footer from './components/Footer'
-
 import './App.css'
 
 const fallbackProducts = [
@@ -17,151 +15,142 @@ const fallbackProducts = [
     id: 'demo-1',
     name: 'Remera básica',
     category: 'Damas',
-    price_retail: null,
-    price_wholesale: null,
-    price: null,
-    image:
-      'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85',
+    description: 'Un básico imprescindible para tu guardarropa.',
+    price_retail: 12000,
+    price_wholesale: 9000,
+    price: 12000,
+    stock: 10,
+    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85',
+    active: true,
   },
   {
     id: 'demo-2',
     name: 'Remera urbana',
     category: 'Hombres',
-    price_retail: null,
-    price_wholesale: null,
-    price: null,
-    image:
-      'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85',
+    description: 'Comodidad y estilo para todos los días.',
+    price_retail: 15000,
+    price_wholesale: 11500,
+    price: 15000,
+    stock: 10,
+    image: 'https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=900&q=85',
+    active: true,
   },
   {
     id: 'demo-3',
-    name: 'Conjunto infantil',
+    name: 'Look mini',
     category: 'Niños',
-    price_retail: null,
-    price_wholesale: null,
-    price: null,
-    image:
-      'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=900&q=85',
+    description: 'Prendas cómodas para acompañar cada aventura.',
+    price_retail: 10000,
+    price_wholesale: 7500,
+    price: 10000,
+    stock: 10,
+    image: 'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=900&q=85',
+    active: true,
   },
   {
     id: 'demo-4',
-    name: 'Zapatillas urbanas',
+    name: 'Calzado urbano',
     category: 'Calzados',
-    price_retail: null,
-    price_wholesale: null,
-    price: null,
-    image:
-      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85',
+    description: 'Un toque de estilo para completar tu outfit.',
+    price_retail: 28000,
+    price_wholesale: 22000,
+    price: 28000,
+    stock: 10,
+    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85',
+    active: true,
   },
 ]
 
-const categories = [
-  'Todos',
-  'Damas',
-  'Hombres',
-  'Niños',
-  'Calzados',
-]
+const categories = ['Todos', 'Damas', 'Hombres', 'Niños', 'Calzados']
 
-function formatPrice(value) {
-  if (value === null || value === undefined || value === '') {
-    return 'Consultar'
+function normalizeProduct(product) {
+  const retailPrice = product.price_retail
+  const wholesalePrice = product.price_wholesale
+  const simplePrice = retailPrice ?? wholesalePrice ?? null
+  const numericStock = Number(product.stock ?? 0)
+
+  return {
+    ...product,
+    id: product.id,
+    name: product.name || 'Producto sin nombre',
+    category: product.category || 'Damas',
+    description: product.description || '',
+    price_retail: retailPrice,
+    price_wholesale: wholesalePrice,
+    price: simplePrice,
+    stock: Number.isFinite(numericStock) ? Math.max(0, numericStock) : 0,
+    image: product.image_url || product.image || '',
+    displayPrice:
+      simplePrice === null || simplePrice === ''
+        ? 'Consultá el precio'
+        : new Intl.NumberFormat('es-AR', {
+            style: 'currency',
+            currency: 'ARS',
+            maximumFractionDigits: 2,
+          }).format(Number(simplePrice)),
   }
-
-  const number = Number(value)
-
-  if (!Number.isFinite(number)) return 'Consultar'
-
-  return number.toLocaleString('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    maximumFractionDigits: 2,
-  })
 }
 
 function App() {
-  const [products, setProducts] = useState(fallbackProducts)
+  const [products, setProducts] = useState([])
   const [activeCategory, setActiveCategory] = useState('Todos')
-  const [cart, setCart] = useState([])
-  const [cartOpen, setCartOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [cartItems, setCartItems] = useState([])
   const [catalogMessage, setCatalogMessage] = useState('')
+  const [loadingProducts, setLoadingProducts] = useState(true)
+  const [isCartOpen, setIsCartOpen] = useState(false)
+
+  const isAdminRoute = window.location.pathname.startsWith('/admin')
 
   useEffect(() => {
+    if (isAdminRoute) return
+
     let cancelled = false
 
     async function loadProducts() {
-      setLoading(true)
-      setCatalogMessage('')
+      setLoadingProducts(true)
 
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .eq('active', true)
-          .order('created_at', { ascending: false })
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('active', true)
+        .order('created_at', { ascending: false })
 
-        if (error) throw error
-        if (cancelled) return
+      if (cancelled) return
 
-        const formattedProducts = (data || []).map((product) => {
-          const retailPrice = product.price_retail ?? null
-          const wholesalePrice = product.price_wholesale ?? null
-          const simplePrice = product.price ?? null
-
-          let displayPrice = 'Consultá el precio'
-
-          if (retailPrice != null || wholesalePrice != null) {
-            displayPrice =
-              `Minorista: ${
-                retailPrice != null
-                  ? formatPrice(retailPrice)
-                  : 'Consultar'
-              } · Mayorista: ${
-                wholesalePrice != null
-                  ? formatPrice(wholesalePrice)
-                  : 'Consultar'
-              }`
-          } else if (simplePrice != null) {
-            displayPrice = formatPrice(simplePrice)
-          }
-
-          return {
-            ...product,
-            id: product.id,
-            name: product.name || 'Producto sin nombre',
-            category: product.category || 'Damas',
-            description: product.description || '',
-            price_retail: retailPrice,
-            price_wholesale: wholesalePrice,
-            price: simplePrice,
-            image:
-              product.image_url ||
-              'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85',
-            displayPrice,
-          }
-        })
-
-        if (formattedProducts.length > 0) {
-          setProducts(formattedProducts)
-        } else {
-          setProducts([])
-          setCatalogMessage(
-            'Todavía no hay productos activos. Publicá productos desde Administración.'
-          )
-        }
-      } catch (error) {
-        console.error('Error al cargar productos:', error.message)
-
-        if (!cancelled) {
-          setProducts(fallbackProducts)
-          setCatalogMessage(
-            'No pudimos conectar con el catálogo. Revisá la conexión con Supabase.'
-          )
-        }
-      } finally {
-        if (!cancelled) setLoading(false)
+      if (error) {
+        console.error('No se pudieron cargar los productos desde Supabase:', error)
+        setProducts(fallbackProducts.map(normalizeProduct))
+        setCatalogMessage(
+          'Estamos mostrando productos de demostración porque no se pudo conectar con el catálogo.',
+        )
+        setLoadingProducts(false)
+        return
       }
+
+      const normalizedProducts = (data || []).map(normalizeProduct)
+      setProducts(normalizedProducts)
+
+      setCartItems((currentItems) =>
+        currentItems
+          .map((item) => {
+            const currentProduct = normalizedProducts.find(
+              (product) => product.id === item.id,
+            )
+
+            if (!currentProduct || currentProduct.stock <= 0) return null
+
+            return {
+              ...currentProduct,
+              quantity: Math.min(
+                Math.max(1, Number(item.quantity) || 1),
+                currentProduct.stock,
+              ),
+            }
+          })
+          .filter(Boolean),
+      )
+
+      setLoadingProducts(false)
     }
 
     loadProducts()
@@ -169,77 +158,96 @@ function App() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [isAdminRoute])
 
-  const cartCount = cart.reduce(
-    (total, item) => total + Number(item.quantity || 0),
-    0
-  )
-
-  const filteredProducts =
+  const visibleProducts =
     activeCategory === 'Todos'
       ? products
-      : products.filter(
-          (product) =>
-            (product.category || '').trim().toLowerCase() ===
-            activeCategory.toLowerCase()
-        )
+      : products.filter((product) => product.category === activeCategory)
 
   function addToCart(product) {
-    setCart((currentCart) => {
-      const existing = currentCart.find(
-        (item) => item.id === product.id
-      )
+    const currentProduct = products.find((item) => item.id === product.id)
 
-      if (existing) {
-        return currentCart.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+    if (!currentProduct) {
+      setCatalogMessage('No encontramos este producto. Actualizá la página e intentá nuevamente.')
+      return
+    }
+
+    const stock = currentProduct.stock
+    const existingItem = cartItems.find((item) => item.id === currentProduct.id)
+    const currentQuantity = existingItem?.quantity || 0
+
+    if (stock <= 0) {
+      setCatalogMessage(`"${currentProduct.name}" está agotado.`)
+      return
+    }
+
+    if (currentQuantity >= stock) {
+      setCatalogMessage(`Solo hay ${stock} unidades de "${currentProduct.name}" disponibles.`)
+      return
+    }
+
+    setCartItems((currentItems) => {
+      const item = currentItems.find((entry) => entry.id === currentProduct.id)
+
+      if (item) {
+        return currentItems.map((entry) =>
+          entry.id === currentProduct.id
+            ? { ...entry, quantity: Math.min(entry.quantity + 1, stock) }
+            : entry,
         )
       }
 
-      return [...currentCart, { ...product, quantity: 1 }]
+      return [...currentItems, { ...currentProduct, quantity: 1 }]
     })
 
-    setCartOpen(true)
+    setCatalogMessage('')
+    setIsCartOpen(true)
   }
 
-  function updateQuantity(productId, amount) {
-    setCart((currentCart) =>
-      currentCart
-        .map((item) =>
-          item.id === productId
-            ? {
-                ...item,
-                quantity: Math.max(
-                  0,
-                  Number(item.quantity || 0) + amount
-                ),
-              }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
+  function updateQuantity(productId, delta) {
+    const product = products.find((item) => item.id === productId)
+
+    if (!product) {
+      removeFromCart(productId)
+      return
+    }
+
+    setCartItems((currentItems) =>
+      currentItems
+        .map((item) => {
+          if (item.id !== productId) return item
+
+          const nextQuantity = item.quantity + delta
+
+          if (nextQuantity <= 0) return null
+
+          return {
+            ...item,
+            quantity: Math.min(nextQuantity, product.stock),
+          }
+        })
+        .filter(Boolean),
     )
+    setCatalogMessage('')
   }
 
-  function selectCategory(category) {
-    setActiveCategory(category)
-
-    document
-      .getElementById('catalogo')
-      ?.scrollIntoView({ behavior: 'smooth' })
+  function removeFromCart(productId) {
+    setCartItems((currentItems) =>
+      currentItems.filter((item) => item.id !== productId),
+    )
+    setCatalogMessage('')
   }
 
-  if (window.location.pathname.replace(/\/+$/, '') === '/admin') {
+  if (isAdminRoute) {
     return <AdminPanel />
   }
 
   return (
     <>
       <Header
-        cartCount={cartCount}
-        onOpenCart={() => setCartOpen(true)}
+        cartCount={cartItems.reduce((total, item) => total + item.quantity, 0)}
+        onOpenCart={() => setIsCartOpen(true)}
       />
 
       <main>
@@ -248,66 +256,52 @@ function App() {
         <Categories
           categories={categories}
           activeCategory={activeCategory}
-          onSelectCategory={selectCategory}
+          onSelectCategory={setActiveCategory}
         />
 
         <section className="catalog" id="catalogo">
+          {loadingProducts && (
+            <p className="catalog-status" role="status">
+              Cargando productos...
+            </p>
+          )}
+
           {catalogMessage && (
-            <p className="catalog-message" role="status">
+            <p className="catalog-status" role="status">
               {catalogMessage}
             </p>
           )}
 
-          {loading ? (
-            <div className="empty-products">
-              <p>Cargando catálogo...</p>
-            </div>
-          ) : (
-            <ProductCatalog
-              products={filteredProducts}
-              categories={categories}
-              activeCategory={activeCategory}
-              onSelectCategory={selectCategory}
-              onAddToCart={addToCart}
-            />
-          )}
+          <ProductCatalog
+            products={visibleProducts}
+            categories={categories}
+            activeCategory={activeCategory}
+            onSelectCategory={setActiveCategory}
+            onAddToCart={addToCart}
+          />
         </section>
 
-<section className="about-section" id="nosotros">
-  <p className="eyebrow">
-    MÁS QUE MODA · FARES FACTORY
-  </p>
+        <Cart
+          cart={cartItems}
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
+          onUpdateQuantity={updateQuantity}
+          onRemove={removeFromCart}
+        />
 
-  <h2>
-    TU ESTILO.
-    <br />
-    <span>MARCÁ LA DIFERENCIA.</span>
-  </h2>
-
-  <p>
-    En Fares Factory encontrás indumentaria y calzado
-    para damas, hombres y niños. Descubrí opciones para
-    renovar tu estilo, con alternativas de compra
-    mayorista y minorista.
-  </p>
-
-  <a className="button button-gold" href="#catalogo">
-    DESCUBRÍ LA COLECCIÓN <span>↗</span>
-  </a>
-</section>
-
-        
+        <section className="about-section" id="nosotros">
+          <div className="about-content">
+            <p className="eyebrow">FARES FACTORY</p>
+            <h2>TU ESTILO. MARCÁ LA DIFERENCIA.</h2>
+            <p>
+              Encontrá prendas y calzados para expresar tu estilo. Elegí tus
+              favoritos y armá un look que hable de vos.
+            </p>
+          </div>
+        </section>
       </main>
 
       <Footer />
-
-      {cartOpen && (
-        <Cart
-          cart={cart}
-          onClose={() => setCartOpen(false)}
-          onUpdateQuantity={updateQuantity}
-        />
-      )}
     </>
   )
 }

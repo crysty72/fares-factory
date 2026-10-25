@@ -26,6 +26,11 @@ function ProductCatalog({
     return 'Consultá el precio'
   }
 
+  function getStock(product) {
+    const stock = Number(product.stock)
+    return Number.isFinite(stock) ? Math.max(0, stock) : 0
+  }
+
   return (
     <section className="catalog" id="catalogo">
       <div className="section-heading">
@@ -68,52 +73,81 @@ function ProductCatalog({
         </div>
       ) : (
         <div className="product-grid">
-          {products.map((product) => (
-            <article className="product-card" key={product.id}>
-              <div className="product-image">
-                <img
-                  src={
-                    product.image ||
-                    product.image_url ||
-                    'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85'
-                  }
-                  alt={product.name}
-                  loading="lazy"
-                />
+          {products.map((product) => {
+            const stock = getStock(product)
+            const available = stock > 0
 
-                <span className="product-tag">
-                  FARES FACTORY
-                </span>
-              </div>
+            return (
+              <article className="product-card" key={product.id}>
+                <div className="product-image">
+                  <img
+                    src={
+                      product.image ||
+                      product.image_url ||
+                      'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85'
+                    }
+                    alt={product.name}
+                    loading="lazy"
+                  />
 
-              <div className="product-info">
-                <p className="product-category">
-                  {product.category || 'Indumentaria'}
-                </p>
+                  <span className="product-tag">
+                    FARES FACTORY
+                  </span>
+                </div>
 
-                <h3>{product.name}</h3>
-
-                {product.description && (
-                  <p className="product-description">
-                    {product.description}
+                <div className="product-info">
+                  <p className="product-category">
+                    {product.category || 'Indumentaria'}
                   </p>
-                )}
 
-                <p className="product-price">
-                  {getDisplayPrice(product)}
-                </p>
+                  <h3>{product.name}</h3>
 
-                <button
-                  className="add-button"
-                  type="button"
-                  onClick={() => onAddToCart(product)}
-                  aria-label={`Agregar ${product.name} al carrito`}
-                >
-                  AGREGAR AL CARRITO <span>+</span>
-                </button>
-              </div>
-            </article>
-          ))}
+                  {product.description && (
+                    <p className="product-description">
+                      {product.description}
+                    </p>
+                  )}
+
+                  <p className="product-price">
+                    {getDisplayPrice(product)}
+                  </p>
+
+                  <p
+                    className={`product-stock ${
+                      available ? 'in-stock' : 'out-of-stock'
+                    }`}
+                    role="status"
+                  >
+                    {available
+                      ? `Stock disponible: ${stock} ${
+                          stock === 1 ? 'unidad' : 'unidades'
+                        }`
+                      : 'Producto agotado'}
+                  </p>
+
+                  <button
+                    className="add-button"
+                    type="button"
+                    onClick={() => onAddToCart(product)}
+                    disabled={!available}
+                    aria-label={
+                      available
+                        ? `Agregar ${product.name} al carrito`
+                        : `${product.name} agotado`
+                    }
+                  >
+                    {available ? (
+                      <>
+                        AGREGAR AL CARRITO <span>+</span>
+                      </>
+                    ) : (
+                      'SIN STOCK'
+                    )}
+                  </button>
+                </div>
+              </article>
+            )
+          })}
         </div>
       )}
     </section>
