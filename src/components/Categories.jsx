@@ -1,4 +1,6 @@
+
 import './Categories.css'
+
 function Categories({ onSelectCategory }) {
   const categories = [
     {
@@ -39,6 +41,15 @@ function Categories({ onSelectCategory }) {
     },
   ]
 
+  function handleCategoryClick(categoryName) {
+    onSelectCategory(categoryName)
+
+    document.getElementById('catalogo')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  }
+
   return (
     <section className="categories-section" id="categorias">
       <div className="section-heading">
@@ -61,7 +72,8 @@ function Categories({ onSelectCategory }) {
             key={category.name}
             className={`category-card ${category.className}`}
             type="button"
-            onClick={() => onSelectCategory(category.name)}
+            onClick={() => handleCategoryClick(category.name)}
+            aria-label={`Explorar categoría ${category.name}`}
           >
             <img
               src={category.image}
