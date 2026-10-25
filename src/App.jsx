@@ -17,8 +17,8 @@ const fallbackProducts = [
     id: 'demo-1',
     name: 'Remera básica',
     category: 'Damas',
-    preci_retail: null,
-    price_whosale: null,
+    price_retail: null,
+    price_wholesale: null,
     price: null,
     image:
       'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85',
@@ -27,8 +27,8 @@ const fallbackProducts = [
     id: 'demo-2',
     name: 'Remera urbana',
     category: 'Hombres',
-    preci_retail: null,
-    price_whosale: null,
+    price_retail: null,
+    price_wholesale: null,
     price: null,
     image:
       'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85',
@@ -37,8 +37,8 @@ const fallbackProducts = [
     id: 'demo-3',
     name: 'Conjunto infantil',
     category: 'Niños',
-    preci_retail: null,
-    price_whosale: null,
+    price_retail: null,
+    price_wholesale: null,
     price: null,
     image:
       'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=900&q=85',
@@ -47,8 +47,8 @@ const fallbackProducts = [
     id: 'demo-4',
     name: 'Zapatillas urbanas',
     category: 'Calzados',
-    preci_retail: null,
-    price_whosale: null,
+    price_retail: null,
+    price_wholesale: null,
     price: null,
     image:
       'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85',
@@ -105,18 +105,8 @@ function App() {
         if (cancelled) return
 
         const formattedProducts = (data || []).map((product) => {
-          const retailPrice =
-            product.preci_retail ??
-            product.price_retail ??
-            product.priceRetail ??
-            null
-
-          const wholesalePrice =
-            product.price_whosale ??
-            product.price_wholesale ??
-            product.priceWholesale ??
-            null
-
+          const retailPrice = product.price_retail ?? null
+          const wholesalePrice = product.price_wholesale ?? null
           const simplePrice = product.price ?? null
 
           let displayPrice = 'Consultá el precio'
@@ -139,17 +129,14 @@ function App() {
           return {
             ...product,
             id: product.id,
-            name: product.name || product.title || 'Producto sin nombre',
+            name: product.name || 'Producto sin nombre',
             category: product.category || 'Damas',
             description: product.description || '',
-            preci_retail: retailPrice,
             price_retail: retailPrice,
-            price_whosale: wholesalePrice,
             price_wholesale: wholesalePrice,
             price: simplePrice,
             image:
               product.image_url ||
-              product.image ||
               'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85',
             displayPrice,
           }
@@ -244,7 +231,6 @@ function App() {
       ?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  // Acceso directo al panel de administración.
   if (window.location.pathname.replace(/\/+$/, '') === '/admin') {
     return <AdminPanel />
   }

@@ -233,8 +233,10 @@ function AdminPanel() {
       name: product.name || '',
       description: product.description || '',
       category: product.category || 'Damas',
-      priceRetail: product.preci_retail ?? '',
-      priceWholesale: product.price_whosale ?? '',
+      
+priceRetail: product.price_retail ?? '',
+priceWholesale: product.price_wholesale ?? '',
+
       sizes: Array.isArray(product.sizes) ? product.sizes.join(', ') : '',
       colors: Array.isArray(product.colors) ? product.colors.join(', ') : '',
       stock: String(product.stock ?? 0),
@@ -288,8 +290,10 @@ function AdminPanel() {
         name: form.name.trim(),
         description: form.description.trim(),
         category: form.category,
-        preci_retail: form.priceRetail === '' ? null : Number(form.priceRetail),
-        price_whosale: form.priceWholesale === '' ? null : Number(form.priceWholesale),
+       
+price_retail: form.priceRetail === '' ? null : Number(form.priceRetail),
+price_wholesale: form.priceWholesale === '' ? null : Number(form.priceWholesale),
+
         image_url: imageUrl,
         sizes: form.sizes.split(',').map((value) => value.trim()).filter(Boolean),
         colors: form.colors.split(',').map((value) => value.trim()).filter(Boolean),
@@ -607,8 +611,8 @@ function AdminPanel() {
                 <span>{product.category}</span>
                 <span>Stock: {product.stock ?? 0}</span>
                 <span>{product.active ? 'Activo' : 'Desactivado'}</span>
-                <span>Minorista: {formatPrice(product.preci_retail)}</span>
-                <span>Mayorista: {formatPrice(product.price_whosale)}</span>
+                <span>Minorista: {formatPrice(product.price_retail)}</span>
+                <span>Mayorista: {formatPrice(product.price_wholesale)}</span>
                 <div className="admin-product-actions">
                   <button
                     type="button"

@@ -1,4 +1,4 @@
-
+import './Categories.css'
 function Categories({ onSelectCategory }) {
   const categories = [
     {

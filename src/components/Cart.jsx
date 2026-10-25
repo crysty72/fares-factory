@@ -14,8 +14,8 @@ function Cart({ cart = [], onClose, onUpdateQuantity }) {
 
   function getPrice(item) {
     const value =
-      item.preci_retail ??
       item.price_retail ??
+      item.price_wholesale ??
       item.priceRetail ??
       item.price
 
