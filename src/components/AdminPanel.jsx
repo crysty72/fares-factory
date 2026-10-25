@@ -518,13 +518,14 @@ price_wholesale: form.priceWholesale === '' ? null : Number(form.priceWholesale)
         </select>
 
         <label htmlFor="product-photo">Foto del producto</label>
-        <input
-          id="product-photo"
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={(event) => setPhoto(event.target.files?.[0] || null)}
-        />
+      
+<input
+  id="product-photo"
+  type="file"
+  accept="image/*"
+  onChange={(event) => setPhoto(event.target.files?.[0] || null)}
+/>
+
         <small>Podés sacar una foto o elegir una de la galería.</small>
         {photo && <p className="admin-hint">Foto seleccionada: {photo.name}</p>}
         {editingId && (
