@@ -1,26 +1,29 @@
 
+
 function Hero() {
   return (
     <section className="hero" id="inicio">
       <div className="hero-content">
         <p className="eyebrow">
-          <span /> NUEVA IDENTIDAD · NUEVA TEMPORADA
+          <span />
+          MÁS QUE MODA · FARES FACTORY
         </p>
 
         <h1>
-          TU ESTILO.
+          VESTÍ TU ESTILO.
           <br />
-          <span>TUS REGLAS.</span>
+          <span>MARCÁ LA DIFERENCIA.</span>
         </h1>
 
         <p className="hero-description">
-          Descubrí una nueva forma de vestir. Tendencias, actitud y
-          estilo para todos los días.
+          Indumentaria y calzado para damas, hombres y niños.
+          Encontrá tu próximo look y elegí cómo querés vestir,
+          con opciones de compra mayorista y minorista.
         </p>
 
         <div className="hero-actions">
           <a className="button button-gold" href="#catalogo">
-            EXPLORAR COLECCIÓN <span>↗</span>
+            DESCUBRÍ LA COLECCIÓN <span>↗</span>
           </a>
 
           <a className="button button-outline" href="#nosotros">
@@ -30,14 +33,15 @@ function Hero() {
 
         <div className="hero-note">
           <span className="gold-line" />
-          <p>VENTA MINORISTA Y MAYORISTA</p>
+          <p>ESTILO PARA CADA PERSONA · MAYORISTA Y MINORISTA</p>
         </div>
       </div>
 
       <div className="hero-visual">
         <img
           src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=1200&q=90"
-          alt="Inspiración de moda y estilo"
+          alt="Inspiración de moda y tendencias de indumentaria"
+          loading="eager"
         />
 
         <div className="image-caption">
@@ -50,7 +54,7 @@ function Hero() {
         </div>
       </div>
 
-      <div className="hero-index">
+      <div className="hero-index" aria-hidden="true">
         01 <span>/ 03</span>
       </div>
     </section>

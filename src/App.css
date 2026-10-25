@@ -242,6 +242,82 @@
    CATÁLOGO Y PRODUCTOS
    ======================================== */
 
+/* ========================================
+   FILTROS DE CATEGORÍAS
+======================================== */
+
+.catalog-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  width: 100%;
+  margin: 0 0 32px;
+}
+
+.filter-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 14px 22px;
+  border: 1px solid #49443a;
+  border-radius: 4px;
+  background: #171715;
+  color: #d8d3ca;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.filter-button:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.filter-button.active {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: #101010;
+}
+
+.filter-button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* Filtros adaptados al celular */
+@media (max-width: 600px) {
+  .catalog-filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 26px;
+  }
+
+  .filter-button {
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    padding: 12px 8px;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .filter-button:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+
+
 .catalog {
   padding: 95px 8%;
 }
@@ -574,6 +650,56 @@
   text-decoration: none;
   white-space: nowrap;
 }
+
+/* ========================================
+   FOOTER RESPONSIVE
+======================================== */
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 40px 6% 20px;
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px 24px;
+  }
+
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+
+  .footer-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .footer-brand {
+    grid-column: auto;
+  }
+
+  .footer-logo {
+    font-size: 21px;
+  }
+
+  .footer-bottom {
+    gap: 12px;
+  }
+
+  .footer-bottom p {
+    font-size: 11px;
+  }
+}
+
 
 /* ========================================
    CARRITO

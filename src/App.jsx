@@ -273,22 +273,30 @@ function App() {
           )}
         </section>
 
-        <section className="about-section" id="nosotros">
-          <p className="eyebrow">MÁS QUE MODA</p>
+<section className="about-section" id="nosotros">
+  <p className="eyebrow">
+    MÁS QUE MODA · FARES FACTORY
+  </p>
 
-          <h2>
-            VESTÍ TU ACTITUD<span>.</span>
-          </h2>
+  <h2>
+    TU ESTILO.
+    <br />
+    <span>MARCÁ LA DIFERENCIA.</span>
+  </h2>
 
-          <p>
-            FARES FACTORY: indumentaria y calzado mayorista
-            y minorista para damas, hombres y niños.
-          </p>
+  <p>
+    En Fares Factory encontrás indumentaria y calzado
+    para damas, hombres y niños. Descubrí opciones para
+    renovar tu estilo, con alternativas de compra
+    mayorista y minorista.
+  </p>
 
-          <a className="button button-gold" href="#catalogo">
-            DESCUBRIR LA COLECCIÓN ↗
-          </a>
-        </section>
+  <a className="button button-gold" href="#catalogo">
+    DESCUBRÍ LA COLECCIÓN <span>↗</span>
+  </a>
+</section>
+
+        
       </main>
 
       <Footer />
